@@ -39,7 +39,7 @@ from ourpackage import routes
 ```
 
 **The Problem:**
-We begin with a regular Flask app configuration, as we can see above. However, there is one problem: our Flask app is currently assigned to the `app` variable.  Recall that, in the previous lab, our Dash app was assigned to the `app` variable as well. 
+We begin with a regular Flask app configuration, as we can see above. However, there is one problem: our Flask app is currently assigned to the `app` variable.  Recall that, in the previous lab, our Dash app was assigned to the `app` variable as well.
 
 `app = dash.Dash()`
 
@@ -68,16 +68,16 @@ app = dash.Dash(__name__, server=server)
 from ourpackage import routes
 ```
 
-So, we are assigning our new Dash app to the variable `app` and telling it to use our Flask application as it's server. If we didn't already have a Flask application set up, we could also leave out the server argument and the Dash app would create a new Flask server for us, as it did in our stand alone Dash application. 
+So, we are assigning our new Dash app to the variable `app` and telling it to use our Flask application as it's server. If we didn't already have a Flask application set up, we could also leave out the server argument and the Dash app would create a new Flask server for us, as it did in our stand alone Dash application.
 
-We can think of the server as an attribute of the Flask app -- this is why we said we would embed the server in the Dash app. Either way, once the server is hooked up to the new Dash app, we can reference it in two ways; assigning it to a variable, `server` like we have in the example above, or by writing `app.server`. 
+We can think of the server as an attribute of the Flask app -- this is why we said we would embed the server in the Dash app. Either way, once the server is hooked up to the new Dash app, we can reference it in two ways; assigning it to a variable, `server` like we have in the example above, or by writing `app.server`.
 
 ### `routes.py`
 
 After we have configured our new Dash app, we need to think about how the changes we just made affect the rest of our application. We must have at least one file that is importing our `app`, right? Let's check -- it looks like our models are importing just our `db` from `ourpackage`, but the routes file is importing the `app`. We were using our Flask instance to create routes on the server but we were referencing this Flask instance as `app`, so, we'll need to change this.
 
 We can do one of two things:
-1. We can import `server` from `ourpackage` if we have defined a `server` variable 
+1. We can import `server` from `ourpackage` if we have defined a `server` variable
 2. We can change the decorators for our routes from `@app.route([ROUTE])` to `@app.server.route([ROUTE])`
 
 In general, we should justify all our coding decisions with some logic and reasoning. We could argue that keeping our import the same lowers the risk of an unforeseen error somewhere else in our code like an undefined variable, for example. This is especially true in larger code bases where there are many more moving parts. Since this application is small, we can choose either of the above options. As it is now part of the app, let's forgo importing `server` in favor of referencing the server with `@app.server.route([ROUTE])` decorators. We must change all of the decorators in our routes file accordingly.
@@ -85,7 +85,7 @@ In general, we should justify all our coding decisions with some logic and reaso
 ### `run.py`
 
 Next, we will need to tweak our `run.py` file, where we are also importing `app` from `ourpackage`. Recall that in our Flask app, our command to run our server was:
-   
+
 ```python
 if __name__ == "__main__":
     app.run(debug=True)
@@ -102,7 +102,7 @@ Now, if we run our application, it should function as it did before we made thes
 
 ### Back to `__init__.py`
 
-There is one caveat - if we visit any URL that is not defined on our server, our Dash app will try to display Dash's layout. 
+There is one caveat - if we visit any URL that is not defined on our server, our Dash app will try to display Dash's layout.
 
 To avoid this behavior and only display the routes that we define, we have to give a third argument to our Dash instance, `url_base_pathname`. What this does is tell our Dash app the route on which we want to display our dashboard. We will give it the route `'/dashboard'` for now, and our application will only display our dashboard at the `'/dashboard'` route.
 
@@ -112,15 +112,15 @@ Now that we have everything configured and working with our existing Flask app, 
 
 The next step is to actually create our dashboard's layout. Previously, we had accomplished this by defining the layout below our new Dash instance. However, there's a bit more going on in our new application. So, let's continue with our pattern of separation of concerns. Let's use the file named `dashboard.py`.
 
-To create our app's layout, we will need to import Dash's html and core components as well as our Dash app itself from ourpackage. 
+To create our app's layout, we will need to import Dash's html and core components as well as our Dash app itself from ourpackage.
 
-```python 
+```python
 import dash_core_components as dcc
 import dash_html_components as html
 from ourpackage import app
 ```
 
-Alright, now we are ready to create our layout. Let's just start out with an h1 and a p tag. The h1 should say "Check it out! This app has Flask AND Dash!" and the p tag should read, "Adding some cool graph here soon:". 
+Alright, now we are ready to create our layout. Let's just start out with an h1 and a p tag. The h1 should say "Check it out! This app has Flask AND Dash!" and the p tag should read, "Adding some cool graph here soon:".
 
 > <h1>Check it out! This app has Flask AND Dash!</h1>
 > <p>Adding some cool graph here soon:</p>
@@ -130,7 +130,7 @@ Once we have our layout written up, let's try try it out! Run `python run.py` in
 > **builtins.AttributeError**
 > AttributeError: 'NoneType' object has no attribute 'traverse'
 
-Oh no! What went wrong? The problem we have is that we are not importing our new app's layout anywhere. Our `routes.py` file is still loading our initial app instance from the `__init__.py` file. So, we will need to change this. We could import our `dashboard.py` file in our `__init__.py` file and then our route to `'/dashboard'` would work since our run file is now importing it when it runs the `__init__.py` file. However, we could imagine in the future that we might want to change our routes based on which graph we are showing. So, we wouldn't be able to keep our separation of concerns if we start defining routes somewhere else in our package. 
+Oh no! What went wrong? The problem we have is that we are not importing our new app's layout anywhere. Our `routes.py` file is still loading our initial app instance from the `__init__.py` file. So, we will need to change this. We could import our `dashboard.py` file in our `__init__.py` file and then our route to `'/dashboard'` would work since our run file is now importing it when it runs the `__init__.py` file. However, we could imagine in the future that we might want to change our routes based on which graph we are showing. So, we wouldn't be able to keep our separation of concerns if we start defining routes somewhere else in our package.
 
 Let's go back to the routes and change up our imports a bit. Let's import our app from the dashboard file. So, our imports will now look like this:
 
@@ -141,7 +141,7 @@ from ourpackage import db, app
 from ourpackage.dashboard import app
 ```
 
-Notice we are importing our app from the `dashboard.py` file where we defined our layout. Now, if we refresh our web page, we will see our dashboard display. If we wanted to make further use of this import and wanted to define another route at which we can view the dashboard, we can simply define another route like we have before and call the `index` method on our app instance. 
+Notice we are importing our app from the `dashboard.py` file where we defined our layout. Now, if we refresh our web page, we will see our dashboard display. If we wanted to make further use of this import and wanted to define another route at which we can view the dashboard, we can simply define another route like we have before and call the `index` method on our app instance.
 
 ```python
 @app.server.route('/go-to-dashboard')
@@ -153,7 +153,7 @@ Now, if you visit the `'/go-to-dashboard'` route, we will see our dashboard disp
 
 ## Adding a Graph
 
-Alright, it's time to add a graph to our dashboard. 
+Alright, it's time to add a graph to our dashboard.
 
 **Remember:** *graph components come from Dash's dash_core_components*
 
