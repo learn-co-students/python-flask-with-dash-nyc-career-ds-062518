@@ -1,5 +1,6 @@
 from ourpackage import db
 
+
 # created models for application
 class User(db.Model):
     __tablename__ = 'users'
