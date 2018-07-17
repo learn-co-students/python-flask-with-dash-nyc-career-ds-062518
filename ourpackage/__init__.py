@@ -2,17 +2,18 @@
 from flask import Flask
 # import SQLAlchemy from flask_sqlalchemy
 from flask_sqlalchemy import SQLAlchemy
-
+import dash
 
 # initialize new flask app
-app = Flask(__name__)
+server = Flask(__name__)
 # add configurations and database
-app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+server.config['DEBUG'] = True
+server.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+server.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # connect flask_sqlalchemy to the configured flask app and create the Dash app
-
+db = SQLAlchemy(server)
+app = dash.Dash(__name__, server=server, url_base_pathname = '/dashboard')
 
 
 #import our routes after our database has been configured
