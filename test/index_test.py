@@ -1,7 +1,7 @@
 import unittest, sys, json
-sys.path.insert(0, '..')
+# sys.path.insert(0, '..')
 from ourpackage import app, server
-sys.path.insert(0, '..')
+# sys.path.insert(0, '..')
 from ourpackage.uber_data import data
 
 class DashAppTestCase(unittest.TestCase):
